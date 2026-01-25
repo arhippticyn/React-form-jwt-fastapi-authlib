@@ -1,5 +1,5 @@
-export const selectToken = state => state.token
+export const selectToken = state => state.auth.token
 
-export const selectUser = state => state.user
+export const selectUser = state => state.auth.user
 
-export const selectIsLogin = state => state.isLogin
+export const selectIsLogin = (state) => state.auth.isLogin;

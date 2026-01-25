@@ -5,7 +5,6 @@ import { selectIsLogin } from "../redux/selectors";
 
 const Register = () => {
     const dispatch = useDispatch()
-    const isLogin = useSelector(selectIsLogin)
 
     const handleRegister = e => {
         e.preventDefault()
@@ -44,8 +43,6 @@ const Register = () => {
           Register
         </button>
       </form>
-
-      {isLogin && <p>User is registered</p>}
     </div>
   );
 }
