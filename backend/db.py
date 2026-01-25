@@ -20,7 +20,7 @@ class Users(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     username: Mapped[str] = mapped_column()
     email: Mapped[str] = mapped_column()
-    password: Mapped[str] = mapped_column()
+    password: Mapped[str] = mapped_column(nullable=True)
     provider: Mapped[str] = mapped_column()
     provider_id: Mapped[str] = mapped_column()
 
