@@ -104,7 +104,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='username or password is not correct')
     
     if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='User is none')
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail='User is none')
     
     payload = {
         'sub': user.username,
