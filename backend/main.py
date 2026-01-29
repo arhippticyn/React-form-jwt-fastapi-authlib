@@ -14,6 +14,8 @@ from authlib.integrations.starlette_client import OAuth
 import os
 from dotenv import load_dotenv
 from urllib.parse import urlencode
+import redis
+import json
 
 load_dotenv()
 
@@ -25,6 +27,8 @@ GITHIB_CLIENT_ID = os.getenv('GITHIB_CLIENT_ID')
 GITHIB_CLIENT_SECRET = os.getenv('GITHIB_CLIENT_SECRET')
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
 GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
+REDIS_HOST = os.getenv('REDIS_HOST')
+REDIS_PORT = 6379
 
 
 app = FastAPI()
@@ -67,6 +71,12 @@ oauth.register(
     authorize_url='https://github.com/login/oauth/authorize',
     api_base_url='https://api.github.com/',
     client_kwargs={'scope': 'user:email'}
+)
+
+redis_client = redis.Redis(
+    host=REDIS_HOST,
+    port=REDIS_PORT,
+    decode_responses=True
 )
 
 pwd_context = CryptContext(schemes=['argon2'], deprecated='auto')
@@ -138,9 +148,26 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     
     return user
 
-@app.get('/user', response_model=UserResponse)
+@app.get('/user')
 async def read_user(user: Users = Depends(get_current_user)):
-    return user
+    cache_key = f'user:{user.id}'
+
+    cache_user = redis_client.get(cache_key)
+
+    if cache_user:
+        return json.loads(cache_user)
+    
+
+    user_data = {
+        'id': user.id,
+        'username': user.username,
+        'email': user.email
+    }
+
+    redis_client.setex(cache_key, 60, json.dumps(user_data))
+
+    return user_data
+    
 
 @app.get('/auth/google')
 async def google_login(request: Request):
